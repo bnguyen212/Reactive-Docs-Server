@@ -8,7 +8,8 @@ var LocalStrategy = require('passport-local').Strategy;
 
 var routes = require('../routes/routes.js');
 var app = express();
-
+var cors = require('cors');
+app.use(cors());
 // if( !process.env.MONGODB_URI ) {
     // throw new Error( "process.env.MONGODB_URI is missing" );
 // }
