@@ -166,7 +166,7 @@ io.on( 'connection', function( socket ) {
       // data: { userId, docId, title }
 
     console.log('hello')
-    
+
     socket.on( 'openDoc', function( data, callback ) {
         var dataId = hash256( data.docId );
         io.in( dataId ).clients( ( clientFindError, clientArray ) => {
@@ -197,6 +197,7 @@ io.on( 'connection', function( socket ) {
               // selectionObj is each User's current selectionStates
             callback( responseData );
             socket.join( dataId );
+            console.log(socket.room);
         });
     });
 
@@ -217,10 +218,11 @@ io.on( 'connection', function( socket ) {
         socket.to( dataId ).emit( 'updateDoc', responseData )
     });
 
-    socket.on('cursor', selection => {
+    socket.on('cursor', (selection, docId) => {
       //console.log("SELECTION", selection);
-      console.log('on cursor')
-      socket.broadcast.to(socket.room).emit('newCursor', {incomingSelectionObj: selection, color: socket.color});
+      //console.log('on cursor')
+      var dataId = hash256( docId );
+      socket.broadcast.to(dataId).emit('newCursor', {incomingSelectionObj: selection, color: socket.color});
     })
 
     // When a user closes a Document, the User leaves that Document's room
