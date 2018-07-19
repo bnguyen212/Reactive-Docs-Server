@@ -164,12 +164,16 @@ function stopAutoSave() {
 io.on( 'connection', function( socket ) {
     // When a User opens a Document, the User joins a room associated with that Document's Id
       // data: { userId, docId, title }
+
+    console.log('hello')
+    
     socket.on( 'openDoc', function( data, callback ) {
         var dataId = hash256( data.docId );
         io.in( dataId ).clients( ( clientFindError, clientArray ) => {
             if( clientFindError ) return console.log( "Client Find Error:", clientFindError );
             if( clientArray.length >= 5 ) return callback( { error: "Document room is full." } );
             var selectedColor = nextColor();
+            socket.color = selectedColor;
             var responseData = {
                 token: data.userId,
                 color: selectedColor,
@@ -213,9 +217,15 @@ io.on( 'connection', function( socket ) {
         socket.to( dataId ).emit( 'updateDoc', responseData )
     });
 
+    socket.on('cursor', selection => {
+      //console.log("SELECTION", selection);
+      console.log('on cursor')
+      socket.broadcast.to(socket.room).emit('newCursor', {incomingSelectionObj: selection, color: socket.color});
+    })
+
     // When a user closes a Document, the User leaves that Document's room
     // The selectionState for that User's color is also cleared
-      // data: { docId, userColor }
+    // data: { docId, userColor }
     socket.on( 'closeDoc', function( data ) {
         var dataId = hash256( data.docId );
         socket.leave( dataId );
